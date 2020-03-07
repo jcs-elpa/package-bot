@@ -1,0 +1,14 @@
+{
+  "name": "package-bot",
+  "version": "1.0.0",
+  "description": "Review new melpa package automatically.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jen-Chieh Shen",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
+}

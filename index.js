@@ -9,11 +9,11 @@
 
 "use strict";
 
+const fs = require('fs');
 const axios = require('axios');
 const { exec } = require("child_process");
 
-// Interval time to do PR review.
-const CHECK_TIME = 1000;
+const config = require('./config');
 
 // Record down the highest PR's ID use to check if there are any new PR.
 var highestPRId = -1;
@@ -23,16 +23,38 @@ var highestPRId = -1;
  * Ensure Emacs is installed.
  */
 function ensureEmacs() {
-  return exec('emacs --version', (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: %{stderr}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
+  return new Promise((resolve, reject) => {
+    exec('emacs --version', (error, stdout, stderr) => {
+      if (error) {
+        console.log('[ERROR] This program require Emacs to be installed %s', error.message);
+        resolve();
+      }
+      if (stderr) {
+        console.log('[ERROR] This program require Emacs to be installed %s', stderr);
+        resolve();
+      }
+      console.log('[INFO] Emacs version checked.\n\n%s', stdout);
+      resolve();
+    });
+  });
+}
+
+/**
+ * Save status to data file.
+ */
+function saveStatus() {
+  let data = {
+    pr_id: highestPRId,
+    timestamp: new Date().toISOString(),
+  };
+  return new Promise((resolve, reject) => {
+    fs.writeFile(config.DATA_PATH, JSON.stringify(data), function (err) {
+      if (err)
+        console.log('[ERROR] Error while saving data %s', err);
+      else
+        console.log("[INFO] Saved status file once => '%s'", config.DATA_PATH);;
+      resolve();
+    });
   });
 }
 
@@ -57,15 +79,36 @@ function doCheckPR() {
 }
 
 /**
+ * Register any events you want here.
+ */
+function registerEvents() {
+  return new Promise((resolve, reject) => {
+    console.log('[INFO] Register event action');
+    {
+      setInterval(doCheckPR, config.CHECK_TIME);
+      console.log('  - Register check PR event');
+    }
+    resolve();
+  });
+}
+
+/**
  * Program entry point.
  */
 function main() {
-  if (!ensureEmacs()) {
-    console.log('[ERROR] This program require Emacs to be installed');
-    return;
-  }
-
-  // Register events.
-  setInterval(doCheckPR, CHECK_TIME);
+  return new Promise((resolve, reject) => {
+    console.log("Start initializing ::: (%s)", config.APP_NAME);
+    resolve();
+  }).then(() => {  /* Ensure Emacs installed. */
+    return ensureEmacs();
+  }).then(() => {  /* Prepare data file. */
+    return saveStatus();
+  }).then(() => {  /* Register events. */
+    return registerEvents();
+  }).then(() => {
+    console.log("Done loading :::");
+  }).catch((err) => {
+    console.log("Initializing fail :::", err);
+  });
 }
 main();

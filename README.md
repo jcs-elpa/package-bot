@@ -1,2 +1,2 @@
 # package-bot
-> Review new melpa package automatically.
+> Review new package automatically on [melpa](https://github.com/melpa/melpa).

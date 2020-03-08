@@ -10,4 +10,4 @@
 
 cd ..
 
-node index.js
+node main.js

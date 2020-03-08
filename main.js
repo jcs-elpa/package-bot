@@ -45,7 +45,7 @@ function ensureEmacs() {
 function saveStatus() {
   let data = {
     pr_id: highestPRId,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
   };
   return new Promise((resolve, reject) => {
     fs.writeFile(config.DATA_PATH, JSON.stringify(data), function (err) {

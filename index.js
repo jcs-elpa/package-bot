@@ -12,11 +12,18 @@
 const axios = require('axios');
 const { exec } = require("child_process");
 
+// Interval time to do PR review.
+const CHECK_TIME = 1000;
+
+// Record down the highest PR's ID use to check if there are any new PR.
+var highestPRId = -1;
+
+
 /**
  * Ensure Emacs is installed.
  */
 function ensureEmacs() {
-  exec('emacs --version', (error, stdout, stderr) => {
+  return exec('emacs --version', (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -29,10 +36,36 @@ function ensureEmacs() {
   });
 }
 
-axios.get('https://api.github.com/repos/melpa/melpa/pulls')
-  .then(response => {
-    console.log(response.data);
-  })
-  .catch(error => {
-    console.log(error);
-  });
+/**
+ * Update the current status use to check if any packae needed to be check.
+ */
+function updateStatus() {
+  axios.get('https://api.github.com/repos/melpa/melpa/pulls')
+    .then(response => {
+      console.log(response.data);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
+
+/**
+ * Main loop to check any PR need to be review.
+ */
+function doCheckPR() {
+
+}
+
+/**
+ * Program entry point.
+ */
+function main() {
+  if (!ensureEmacs()) {
+    console.log('[ERROR] This program require Emacs to be installed');
+    return;
+  }
+
+  // Register events.
+  setInterval(doCheckPR, CHECK_TIME);
+}
+main();

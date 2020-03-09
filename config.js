@@ -18,9 +18,13 @@ const APP_NAME = 'package-bot - MELPA';
 
 const DATA_PATH = './status.dat';
 
+// Clone the review package to this path.
+const REVIEW_PATH = './review/';
+
 //------------------- Module Exports -------------------//
 
 module.exports.DEBUG = DEBUG;
 module.exports.CHECK_TIME = CHECK_TIME;
 module.exports.APP_NAME = APP_NAME;
 module.exports.DATA_PATH = DATA_PATH;
+module.exports.REVIEW_PATH = REVIEW_PATH;

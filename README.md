@@ -1,5 +1,5 @@
 # package-bot
-> Review new package automatically on [melpa](https://github.com/melpa/melpa).
+> Review new package PR on [melpa](https://github.com/melpa/melpa) automatically.
 
 ## Required Software
 

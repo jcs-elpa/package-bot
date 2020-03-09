@@ -9,8 +9,10 @@
 
 "use strict";
 
+const DEBUG = true;
+
 // Interval time to do PR review.
-const CHECK_TIME = 1000;
+const CHECK_TIME = 1000 * 60 * 30;
 
 const APP_NAME = 'package-bot - MELPA';
 
@@ -18,6 +20,7 @@ const DATA_PATH = './status.dat';
 
 //------------------- Module Exports -------------------//
 
+module.exports.DEBUG = DEBUG;
 module.exports.CHECK_TIME = CHECK_TIME;
 module.exports.APP_NAME = APP_NAME;
 module.exports.DATA_PATH = DATA_PATH;

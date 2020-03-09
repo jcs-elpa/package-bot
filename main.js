@@ -109,6 +109,7 @@ function main() {
     return registerEvents();
   }).then(() => {
     console.log("\nDone loading :::");
+    if (config.DEBUG) doCheckPR();
   }).catch((err) => {
     console.log("\nInitializing fail :::", err);
   });

@@ -20,20 +20,22 @@ var highestPRId = -1;
 
 
 /**
- * Ensure Emacs is installed.
+ * Check if the command valid.
+ * @param { string } cmd : Command to check installed.
+ * @param { string } name : Name of the software to be prompt.
  */
-function ensureEmacs() {
+function ensureCommand(cmd, name) {
   return new Promise((resolve, reject) => {
-    exec('emacs --version', (error, stdout, stderr) => {
+    exec(cmd, (error, stdout, stderr) => {
       if (error) {
-        console.log('[ERROR] This program require Emacs to be installed %s', error.message);
+        console.log('[ERROR] This program require %s to be installed %s', name, error.message);
         resolve();
       }
       if (stderr) {
-        console.log('[ERROR] This program require Emacs to be installed %s', stderr);
+        console.log('[ERROR] This program require %s to be installed %s', name, stderr);
         resolve();
       }
-      console.log('[INFO] Emacs version checked.\n\n%s', stdout);
+      console.log('[INFO] %s version checked.\n\n%s', name, stdout);
       resolve();
     });
   });
@@ -41,6 +43,9 @@ function ensureEmacs() {
 
 /**
  * Save status to data file.
+ *
+ * Keep the status so next time you bootup the service it wouldn't
+ * forget what was the state last time we closed.
  */
 function saveStatus() {
   let data = {
@@ -53,6 +58,29 @@ function saveStatus() {
         console.log('[ERROR] Error while saving data %s', err);
       else
         console.log("[INFO] Saved status file once => '%s'", config.DATA_PATH);;
+      resolve();
+    });
+  });
+}
+
+/**
+ * Load status from storage.
+ *
+ * Read the status data to revive our data to current service. The next
+ * PR check will be the latest PR. Hence, we wouldn't make package review
+ * twice.
+ */
+function loadStatus() {
+  return new Promise((resolve, reject) => {
+    fs.readFile(config.DATA_PATH, function (err, rw_data) {
+      if (err)
+        console.log('[ERROR] Error while loading status %s', err);
+      else {
+        console.log('[INFO] Reading status...');
+        console.log('%s', rw_data);
+        let data = JSON.parse(rw_data);
+        highestPRId = data.pr_id;
+      }
       resolve();
     });
   });
@@ -86,7 +114,7 @@ function registerEvents() {
     console.log('[INFO] Register event action');
     {
       setInterval(doCheckPR, config.CHECK_TIME);
-      console.log('  - Register check PR event');
+      console.log('  - [ ] Register check PR event');
     }
     resolve();
   });
@@ -99,16 +127,21 @@ function main() {
   return new Promise((resolve, reject) => {
     console.log("Start initializing ::: (%s)", config.APP_NAME);
     resolve();
+  }).then(() => {  /* Ensure Git installed. */
+    return ensureCommand('git --version', 'Git');
   }).then(() => {  /* Ensure Emacs installed. */
-    return ensureEmacs();
+    return ensureCommand('emacs --version', 'Emacs');
   }).then(() => {  /* Prepare data file. */
-    return saveStatus();
+    if (fs.existsSync(config.DATA_PATH))
+      return loadStatus();
+    else
+      return saveStatus();
   }).then(() => {  /* Register events. */
     return registerEvents();
   }).then(() => {
-    console.log("Done loading :::");
+    console.log("\nDone loading :::");
   }).catch((err) => {
-    console.log("Initializing fail :::", err);
+    console.log("\nInitializing fail :::", err);
   });
 }
 main();

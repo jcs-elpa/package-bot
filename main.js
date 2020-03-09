@@ -14,9 +14,12 @@ const axios = require('axios');
 const { exec } = require("child_process");
 
 const config = require('./config');
+const data = require('./data');
 
-// Record down the highest PR's ID use to check if there are any new PR.
-var highestPRId = -1;
+
+// Use to store the newest PR Id. To check if we need to make any
+// package review.
+var new_pr_id = -1;
 
 
 /**
@@ -42,68 +45,34 @@ function ensureCommand(cmd, name) {
 }
 
 /**
- * Save status to data file.
- *
- * Keep the status so next time you bootup the service it wouldn't
- * forget what was the state last time we closed.
- */
-function saveStatus() {
-  let data = {
-    pr_id: highestPRId,
-    timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
-  };
-  return new Promise((resolve, reject) => {
-    fs.writeFile(config.DATA_PATH, JSON.stringify(data), function (err) {
-      if (err)
-        console.log('[ERROR] Error while saving data %s', err);
-      else
-        console.log("[INFO] Saved status file once => '%s'", config.DATA_PATH);;
-      resolve();
-    });
-  });
-}
-
-/**
- * Load status from storage.
- *
- * Read the status data to revive our data to current service. The next
- * PR check will be the latest PR. Hence, we wouldn't make package review
- * twice.
- */
-function loadStatus() {
-  return new Promise((resolve, reject) => {
-    fs.readFile(config.DATA_PATH, function (err, rw_data) {
-      if (err)
-        console.log('[ERROR] Error while loading status %s', err);
-      else {
-        console.log('[INFO] Reading status...');
-        console.log('%s', rw_data);
-        let data = JSON.parse(rw_data);
-        highestPRId = data.pr_id;
-      }
-      resolve();
-    });
-  });
-}
-
-/**
  * Update the current status use to check if any packae needed to be check.
  */
 function updateStatus() {
-  axios.get('https://api.github.com/repos/melpa/melpa/pulls')
-    .then(response => {
-      console.log(response.data);
-    })
-    .catch(error => {
-      console.log(error);
-    });
+  return new Promise((resolve, reject) => {
+    axios.get('https://api.github.com/repos/melpa/melpa/pulls')
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  });
 }
 
 /**
  * Main loop to check any PR need to be review.
  */
 function doCheckPR() {
-
+  return new Promise((resolve, reject) => {
+    console.log("Start checking PR package :::");
+    resolve();
+  }).then(() => {  /* Update PR status. */
+    return updateStatus();
+  }).then(() => {
+    console.log("\nDone loading :::");
+  }).catch((err) => {
+    console.log("\nFailed check PR while processing :::", err);
+  });
 }
 
 /**
@@ -133,9 +102,9 @@ function main() {
     return ensureCommand('emacs --version', 'Emacs');
   }).then(() => {  /* Prepare data file. */
     if (fs.existsSync(config.DATA_PATH))
-      return loadStatus();
+      return data.loadStatus();
     else
-      return saveStatus();
+      return data.saveStatus();
   }).then(() => {  /* Register events. */
     return registerEvents();
   }).then(() => {

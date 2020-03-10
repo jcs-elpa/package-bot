@@ -1,5 +1,5 @@
 /**
- * $File: util.js $
+ * $File: helper.js $
  * $Date: 2020-03-09 23:44:53 $
  * $Revision: $
  * $Creator: Jen-Chieh Shen $
@@ -9,7 +9,9 @@
 
 "use strict";
 
-const { exec } = require("child_process");
+const fs = require('fs');
+const path = require("path");
+const childProcecss = require("child_process");
 
 
 /**
@@ -19,19 +21,8 @@ const { exec } = require("child_process");
  */
 function cloneProject(url, path) {
   let cmd = 'git clone ' + url +  ' ' + path;
-  return new Promise((resolve, reject) => {
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) {
-        console.log('[ERROR] Clone project error: %s', error.message);
-        resolve();
-      }
-      if (stderr) {
-        console.log('[ERROR] Clone project error: %s', stderr);
-        resolve();
-      }
-      console.log('[INFO] Cloning project from %s to %s,\n\n %s', url, path, stdout);
-      resolve();
-    });
+  childProcecss.execSync(cmd, (error, stdout, stderr) => {
+    console.log('[INFO] Cloning project from %s to %s %s', url, path, stdout);
   });
 }
 
@@ -42,7 +33,7 @@ function cloneProject(url, path) {
  */
 function ensureCommand(cmd, name) {
   return new Promise((resolve, reject) => {
-    exec(cmd, (error, stdout, stderr) => {
+    childProcecss.exec(cmd, (error, stdout, stderr) => {
       if (error) {
         console.log('[ERROR] This program require %s to be installed %s', name, error.message);
         resolve();
@@ -64,8 +55,31 @@ function getTimestamp() {
   return new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 }
 
+/**
+ * Remove directory.
+ * @param { string } dirPath : Directory path.
+ */
+function removeDir(dirPath) {
+  if (!fs.existsSync(dirPath)) return;
+
+  let list = fs.readdirSync(dirPath);
+  for (var index = 0; index < list.length; ++index) {
+    let filename = path.join(dirPath, list[index]);
+    let stat = fs.statSync(filename);
+
+    if (filename == "." || filename == "..") {
+      // do nothing for current and parent dir
+    } else if (stat.isDirectory())
+      removeDir(filename);
+    else
+      fs.unlinkSync(filename);
+  }
+  fs.rmdirSync(dirPath);
+};
+
 //------------------- Module Exports -------------------//
 
 module.exports.cloneProject = cloneProject;
 module.exports.ensureCommand = ensureCommand;
 module.exports.getTimestamp = getTimestamp;
+module.exports.removeDir = removeDir;

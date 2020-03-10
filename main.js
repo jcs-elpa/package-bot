@@ -10,16 +10,21 @@
 "use strict";
 
 const fs = require('fs');
+const util = require('util');
+const childProcecss = require("child_process");
+
 const axios = require('axios');
 
 const config = require('./config');
 const data = require('./data');
-const util = require('./util');
+const helper = require('./helper');
 
 
 // Use to store the newest PR Id. To check if we need to make any
 // package review.
 var latest_pr_id = -1;
+
+var infos = [];
 
 
 /**
@@ -52,10 +57,12 @@ function parseTemplate (body) {
   let info = {
     summary : '',     /* No use */
     link: '',
-    name: '',         /* Name of the repository. */
     association: '',  /* No use */
     upstream: '',     /* No use */
     checklist: '',    /* No use */
+
+    name: '',         /* Name of the repository. */
+    clone_path: '',   /* Record down the clone path. */
   };
 
   let link_title = '### Direct link to the package repository';
@@ -86,18 +93,50 @@ function getPRInfo(num) {
         let body = response.data.body;
         let info = parseTemplate(body);
 
-        if (info.link == '') resolve();
+        if (info.link == '') {
+          console.log('[INFO] Detect PR %s is not the new package, no need to review', num);
+          resolve();
+        }
 
-        let clone_path = config.REVIEW_PATH + info.name + '/';
-        util.cloneProject(info.link, clone_path);
+        infos.push(info);
 
-        // TODO: clone project.
+        info.clone_path = config.REVIEW_PATH + info.name + '/';
+        helper.removeDir(info.clone_path);                // Remove before clone.
+        helper.cloneProject(info.link, info.clone_path);  // Clone it.
+
+        /* Start review progress for this PR. */
+        {
+          let cmd = util.format('emacs --batch --eval "%s" -l "%s"',
+                                util.format('(setq project-dir \\"%s\\")', info.clone_path),
+                                config.REVIEW_SCRIPT);
+
+          childProcecss.execSync(cmd, (error, stdout, stderr) => { });
+        }
+
         resolve();
       })
       .catch(error => {
-        console.log('[ERROR] Error while getting PR info: %s => %s', num, error);
+        console.log('[ERROR] Error while getting PR %s info: %s', num, error);
         resolve();
       });
+  });
+}
+
+/**
+ * Start the review loop.
+ */
+function startReview() {
+  return new Promise((resolve, reject) => {
+    resolve();
+  }).then(() => {
+    ++data.status.pr_id;
+    return getPRInfo(data.status.pr_id);
+  }).then(() => {
+    if (data.status.pr_id < latest_pr_id)
+      return startReview();
+    // PR ID will eventaully be the lastest PR ID.
+    data.status.pr_id = latest_pr_id;
+    return 0;
   });
 }
 
@@ -106,18 +145,26 @@ function getPRInfo(num) {
  */
 function makeReview() {
   return new Promise((resolve, reject) => {
+    resolve();
+  }).then(() => {
     if (latest_pr_id == data.status.pr_id) {
       console.log("[INFO] No new package PR need to review");
-      resolve();
+      return 0;
     }
+    return startReview();
+  });
+}
 
-    while (data.status.pr_id < latest_pr_id) {
-      ++data.status.pr_id;
-      new Promise((resolve, reject) => { return getPRInfo(data.status.pr_id); });
-    }
-
-    // PR ID will eventaully be the lastest PR ID.
-    data.status.pr_id = latest_pr_id;
+/**
+ * Clean up the review process.
+ */
+function cleanup() {
+  return new Promise((resolve, reject) => {
+    console.log('[INFO] Cleaning up the process');
+    infos.forEach(function (info) {
+      helper.removeDir(info.clone_path);
+    });
+    infos = [];  // clean up the array.
     resolve();
   });
 }
@@ -136,8 +183,11 @@ function doCheckPR() {
   }).then(() => {  /* Save last status once. */
     //return data.saveStatus();
     return;
+  }).then(() => {  /* Do clean up. */
+    //return cleanup();
+    return;
   }).then(() => {
-    console.log("[INFO] Done review package at time: %s", util.getTimestamp());
+    console.log("[INFO] Done review package at time: %s", helper.getTimestamp());
   }).catch((err) => {
     console.log("[ERROR] Failed check PR while processing", err);
   });
@@ -165,9 +215,9 @@ function main() {
     console.log("Start initializing ::: (%s)", config.APP_NAME);
     resolve();
   }).then(() => {  /* Ensure Git installed. */
-    return util.ensureCommand('git --version', 'Git');
+    return helper.ensureCommand('git --version', 'Git');
   }).then(() => {  /* Ensure Emacs installed. */
-    return util.ensureCommand('emacs --version', 'Emacs');
+    return helper.ensureCommand('emacs --version', 'Emacs');
   }).then(() => {  /* Prepare data file. */
     if (fs.existsSync(config.DATA_PATH))
       return data.loadStatus();

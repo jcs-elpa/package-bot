@@ -87,6 +87,7 @@ function parseTemplate (body) {
  */
 function getPRInfo(num) {
   console.log('[INFO] Get PR %s information', num);
+  console.log('---------------------------------------------------------');
   return new Promise((resolve, reject) => {
     axios.get('https://api.github.com/repos/melpa/melpa/pulls/' + num)
       .then(response => {
@@ -106,11 +107,37 @@ function getPRInfo(num) {
 
         /* Start review progress for this PR. */
         {
-          let cmd = util.format('emacs --batch --eval "%s" -l "%s"',
-                                util.format('(setq project-dir \\"%s\\")', info.clone_path),
-                                config.REVIEW_SCRIPT);
+          let review_cmd = util.format
+          ('emacs --batch --eval "(progn %s)" -l "%s"',
+           util.format('%s %s %s',
+                       util.format('(setq project-dir \\"%s\\")', info.clone_path),
+                       util.format('(setq output-path \\"%s\\")', config.OUTPUT_PATH),
+                       util.format('(setq template-body \\"%s\\")', config.TEMPLATE_BODY)),
+           config.REVIEW_SCRIPT);
 
-          childProcecss.execSync(cmd, (error, stdout, stderr) => { });
+          childProcecss.execSync(review_cmd, (error, stdout, stderr) => { });
+        }
+
+        /* Make PR comment. */
+        {
+          console.log('[INFO] Making package review to the PR..');
+          let pr_param = {
+            body: '',
+          };
+
+          pr_param.body = fs.readFileSync(config.OUTPUT_PATH, 'utf-8');
+
+          fs.writeFileSync(config.REQUEST_DATA, JSON.stringify(pr_param));
+
+          let url = 'https://api.github.com/repos/melpa/melpa/issues/' + num + '/comments';
+
+          url = 'https://api.github.com/repos/jcs090218/package-bot/issues/1/comments';
+
+          let comment_cmd = util.format
+          ('curl -u %s:%s --header "Content-Type: application/json" --request POST --data \"@%s\" \"%s\"',
+           config.USERNAME, config.ACCESS_TOKEN, config.REQUEST_DATA, url);
+
+          childProcecss.execSync(comment_cmd, (error, stdout, stderr) => { });
         }
 
         resolve();

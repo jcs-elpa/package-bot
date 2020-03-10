@@ -125,13 +125,17 @@ function getPRInfo(num) {
             body: '',
           };
 
-          pr_param.body = fs.readFileSync(config.OUTPUT_PATH, 'utf-8');
+          let header = fs.readFileSync(config.TEMPLATE_HEADER, 'utf-8');
+          let body = fs.readFileSync(config.OUTPUT_PATH, 'utf-8');
+          let footer = fs.readFileSync(config.TEMPLATE_FOOTER, 'utf-8');
+          pr_param.body = header + body + footer;
 
           fs.writeFileSync(config.REQUEST_DATA, JSON.stringify(pr_param));
 
           let url = 'https://api.github.com/repos/melpa/melpa/issues/' + num + '/comments';
 
-          url = 'https://api.github.com/repos/jcs090218/package-bot/issues/1/comments';
+          if (config.DEBUG)
+            url = 'https://api.github.com/repos/jcs090218/package-bot/issues/1/comments';
 
           let comment_cmd = util.format
           ('curl -u %s:%s --header "Content-Type: application/json" --request POST --data \"@%s\" \"%s\"',
@@ -208,11 +212,9 @@ function doCheckPR() {
   }).then(() => {  /* Do pacakge review. */
     return makeReview();
   }).then(() => {  /* Save last status once. */
-    //return data.saveStatus();
-    return;
+    return data.saveStatus();
   }).then(() => {  /* Do clean up. */
-    //return cleanup();
-    return;
+    return cleanup();
   }).then(() => {
     console.log("[INFO] Done review package at time: %s", helper.getTimestamp());
   }).catch((err) => {

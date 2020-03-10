@@ -24,6 +24,7 @@ const REQUEST_DATA    = './request.json';  // Temporary file to output the body 
 
 const TEMPLATE_HEADER = './templates/header.md';
 const TEMPLATE_BODY   = './templates/body.md';
+const TEMPLATE_FOOTER   = './templates/footer.md';
 
 const USERNAME        = '';
 const ACCESS_TOKEN    = '';
@@ -40,5 +41,6 @@ module.exports.OUTPUT_PATH = OUTPUT_PATH;
 module.exports.REQUEST_DATA = REQUEST_DATA;
 module.exports.TEMPLATE_HEADER = TEMPLATE_HEADER;
 module.exports.TEMPLATE_BODY = TEMPLATE_BODY;
+module.exports.TEMPLATE_FOOTER = TEMPLATE_FOOTER;
 module.exports.USERNAME = USERNAME;
 module.exports.ACCESS_TOKEN = ACCESS_TOKEN;

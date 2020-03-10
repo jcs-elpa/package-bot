@@ -26,21 +26,21 @@
 
 (defun review-compile-log ()
   "Return compile log as string for current buffer."
-  (byte-compile-file (buffer-name))
+  (ignore-errors (byte-compile-file (buffer-name)))
   (ignore-errors
     (with-current-buffer "*Compile-Log*"
       (buffer-string))))
 
 (defun review-checkdoc ()
   "Return checkdoc as string for current buffer."
-  (checkdoc)
+  (ignore-errors (checkdoc))
   (ignore-errors
     (with-current-buffer "*Checkdoc Status*"
       (buffer-string))))
 
 (defun review-package-lint ()
   "Return package lint as string for current buffer."
-  (package-lint-current-buffer)
+  (ignore-errors (package-lint-current-buffer))
   (ignore-errors
     (with-current-buffer "*Package-Lint*"
       (buffer-string))))
@@ -72,7 +72,7 @@
   (dolist (dir dirs)
     (setq files-el (directory-files dir nil "\\.el$"))
     (dolist (file files-el)
-      (setq file (concat dir file))
+      (setq file (concat dir (if (string-match-p "/$" dir) "" "/") file))
       (message "> Checking file: '%s'" file)
       (find-file file)
       (review-do))))

@@ -29,7 +29,7 @@ var status = {
  * forget what was the state last time we closed.
  */
 function saveStatus() {
-  status.timestamp = util.getTimestamp();
+  status.timestamp = helper.getTimestamp();
   return new Promise((resolve, reject) => {
     fs.writeFile(config.DATA_PATH, JSON.stringify(status), function (err) {
       if (err)

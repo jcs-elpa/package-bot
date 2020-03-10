@@ -75,7 +75,8 @@ function parseTemplate (body) {
     info.link = lines[lines.indexOf(link_title) + 1];
 
     let url_path = info.link.split('/');
-    info.name = url_path[url_path.length - 1];
+    let pos_offset = (info.link.slice(-1) == '/') ? 2 : 1;
+    info.name = url_path[url_path.length - pos_offset];
   }
 
   return info;

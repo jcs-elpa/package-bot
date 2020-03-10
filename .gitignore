@@ -4,6 +4,10 @@
 # ignore log
 .log
 
+# ignore review
+review
+!/review/README.md
+
 # ignore dependencies
 node_modules
 

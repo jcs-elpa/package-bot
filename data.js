@@ -12,7 +12,7 @@
 const fs = require('fs');
 
 const config = require('./config');
-const util = require('./util');
+const helper = require('./helper');
 
 
 /* Save data structure. */

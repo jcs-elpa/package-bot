@@ -53,6 +53,7 @@
          (cmp-log (review-compile-log))
          (pkg-lnt (review-package-lint))
          (ckdoc (review-checkdoc))
+         ;; NOTE: Order should corresponds to the template file.
          (review-text (format template-str
                               file-name
                               checkdoc-version ckdoc
@@ -66,7 +67,7 @@
 (setq project-dir (expand-file-name project-dir))
 (review-write "")  ; Clean up.
 
-(message "Checking project directory: %s" project-dir)
+(message "> Checking project directory: %s" project-dir)
 
 (let ((dirs (f-directories project-dir nil t))
       (files-el '()))

@@ -117,7 +117,7 @@ function getPRInfo(num) {
                        util.format('(setq template-body \\"%s\\")', config.TEMPLATE_BODY)),
            config.REVIEW_SCRIPT);
 
-          childProcecss.execSync(review_cmd, (error, stdout, stderr) => { });
+          childProcecss.execSync(review_cmd);
         }
 
         /* Make PR comment. */

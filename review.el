@@ -24,26 +24,25 @@
   "Write STR to output file."
   (write-region str nil output-path append))
 
+(defun review-get-buffer (buf-name default-str)
+  "Get the buffer string from BUF-NAME, if not found return DEFAULT-STR instead."
+  (let ((buf-str (ignore-errors (with-current-buffer buf-name (buffer-string)))))
+    (if buf-str buf-str default-str)))
+
 (defun review-compile-log ()
   "Return compile log as string for current buffer."
   (ignore-errors (byte-compile-file (buffer-name)))
-  (ignore-errors
-    (with-current-buffer "*Compile-Log*"
-      (buffer-string))))
+  (review-get-buffer "*Compile-Log*" "No issues found."))
 
 (defun review-checkdoc ()
   "Return checkdoc as string for current buffer."
-  (ignore-errors (checkdoc))
-  (ignore-errors
-    (with-current-buffer "*Checkdoc Status*"
-      (buffer-string))))
+  (ignore-errors (checkdoc-file (buffer-file-name)))
+  (review-get-buffer "*Warnings*" "No issues found."))
 
 (defun review-package-lint ()
   "Return package lint as string for current buffer."
   (ignore-errors (package-lint-current-buffer))
-  (ignore-errors
-    (with-current-buffer "*Package-Lint*"
-      (buffer-string))))
+  (ignore-errors (with-current-buffer "*Package-Lint*" (buffer-string))))
 
 (defun review-do ()
   "Do the review package action."

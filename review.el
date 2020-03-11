@@ -47,11 +47,14 @@
 
 (defun review-do ()
   "Do the review package action."
-  (let* ((cmp-log (review-compile-log))
+  (let* ((file-name (substring (buffer-file-name)
+                               (length (cdr (project-current)))
+                               (length (buffer-file-name))))
+         (cmp-log (review-compile-log))
          (pkg-lnt (review-package-lint))
          (ckdoc (review-checkdoc))
          (review-text (format template-str
-                              (buffer-name)
+                              file-name
                               checkdoc-version ckdoc
                               emacs-version cmp-log
                               pkg-lnt)))

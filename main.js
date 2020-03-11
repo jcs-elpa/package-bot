@@ -108,6 +108,7 @@ function getPRInfo(num) {
 
         /* Start review progress for this PR. */
         {
+          console.log('[INFO] Starting the review progress..');
           let review_cmd = util.format
           ('emacs --batch --eval "(progn %s)" -l "%s"',
            util.format('%s %s %s',

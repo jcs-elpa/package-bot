@@ -20,9 +20,10 @@
     (insert-file-contents path)
     (buffer-string)))
 
-(defun review-write (str &optional append)
-  "Write STR to output file."
-  (write-region str nil output-path append))
+(defun review-write (str path &optional append)
+  "Write STR to PATH file.
+APPEND to the file."
+  (write-region str nil path append))
 
 (defun review-get-buffer (buf-name default-str)
   "Get the buffer string from BUF-NAME, if not found return DEFAULT-STR instead."
@@ -53,21 +54,39 @@
          (pkg-lnt (review-package-lint))
          (ckdoc (review-checkdoc))
          ;; NOTE: Order should corresponds to the template file.
-         (review-text (format template-str
+         (review-text (format template-body-str
                               file-name
                               checkdoc-version ckdoc
                               emacs-version cmp-log
                               pkg-lnt)))
-    (review-write review-text t)))
+    (review-write review-text output-body t)))
 
-
-(setq output-path (expand-file-name output-path))
-(setq template-str (review-read-file template-body))
-(setq project-dir (expand-file-name project-dir))
-(review-write "")  ; Clean up.
+;; Prepare variables from `main.js'.
+(progn
+  (setq output-header (expand-file-name output-header))
+  (setq output-body (expand-file-name output-body))
+  (setq output-footer (expand-file-name output-footer))
+  (setq template-header (expand-file-name template-header))
+  (setq template-body (expand-file-name template-body))
+  (setq template-footer (expand-file-name template-footer))
+  (setq project-dir (expand-file-name project-dir)))
+;; Prepare new variables.
+(progn
+  (setq template-header-str (review-read-file template-header))
+  (setq template-body-str (review-read-file template-body))
+  (setq template-footer-str (review-read-file template-footer)))
+;; Clean up.
+(progn
+  (review-write "" output-header)
+  (review-write "" output-body)
+  (review-write "" output-footer))
 
 (message "> Checking project directory: %s" project-dir)
 
+;; Writing output header.
+(review-write template-header-str output-header)
+
+;; Writing output body.
 (let ((dirs (f-directories project-dir nil t))
       (files-el '()))
   (push project-dir dirs)
@@ -79,5 +98,8 @@
       (message "> Checking file: '%s'" file)
       (find-file file)
       (review-do))))
+
+;; Writing output footer.
+(review-write template-footer-str output-footer)
 
 (message "Done review package")

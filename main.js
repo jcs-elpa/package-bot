@@ -24,6 +24,7 @@ const helper = require('./helper');
 // package review.
 var latest_pr_id = -1;
 
+// Use to clean up afterward.
 var infos = [];
 
 
@@ -53,7 +54,7 @@ function updateStatus() {
  * ```
  * @param { string } body : String of the message.
  */
-function parseTemplate (body) {
+function parseTemplate(body) {
   let info = {
     summary : '',     /* No use */
     link: '',
@@ -111,10 +112,14 @@ function getPRInfo(num) {
           console.log('[INFO] Starting the review progress..');
           let review_cmd = util.format
           ('emacs --batch --eval "(progn %s)" -l "%s"',
-           util.format('%s %s %s',
+           util.format('%s %s %s %s %s %s %s',
                        util.format('(setq project-dir \\"%s\\")', info.clone_path),
-                       util.format('(setq output-path \\"%s\\")', config.OUTPUT_PATH),
-                       util.format('(setq template-body \\"%s\\")', config.TEMPLATE_BODY)),
+                       util.format('(setq output-header \\"%s\\")', config.OUTPUT_HEADER),
+                       util.format('(setq output-body \\"%s\\")', config.OUTPUT_BODY),
+                       util.format('(setq output-footer \\"%s\\")', config.OUTPUT_FOOTER),
+                       util.format('(setq template-header \\"%s\\")', config.TEMPLATE_HEADER),
+                       util.format('(setq template-body \\"%s\\")', config.TEMPLATE_BODY),
+                       util.format('(setq template-footer \\"%s\\")', config.TEMPLATE_FOOTER)),
            config.REVIEW_SCRIPT);
 
           childProcecss.execSync(review_cmd);
@@ -127,9 +132,9 @@ function getPRInfo(num) {
             body: '',
           };
 
-          let header = fs.readFileSync(config.TEMPLATE_HEADER, 'utf-8');
-          let body = fs.readFileSync(config.OUTPUT_PATH, 'utf-8');
-          let footer = fs.readFileSync(config.TEMPLATE_FOOTER, 'utf-8');
+          let header = fs.readFileSync(config.OUTPUT_HEADER, 'utf-8');
+          let body = fs.readFileSync(config.OUTPUT_BODY, 'utf-8');
+          let footer = fs.readFileSync(config.OUTPUT_FOOTER, 'utf-8');
           pr_param.body = header + body + footer;
 
           fs.writeFileSync(config.REQUEST_DATA, JSON.stringify(pr_param));
@@ -137,7 +142,7 @@ function getPRInfo(num) {
           let url = 'https://api.github.com/repos/melpa/melpa/issues/' + num + '/comments';
 
           if (config.DEBUG)
-            url = 'https://api.github.com/repos/jcs090218/package-bot/issues/1/comments';
+            url = 'https://api.github.com/repos/jcs090218/package-bot/issues/2/comments';
 
           let comment_cmd = util.format
           ('curl -u %s:%s --header "Content-Type: application/json" --request POST --data \"@%s\" \"%s\"',

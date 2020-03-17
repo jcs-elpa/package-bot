@@ -4,9 +4,11 @@
 # ignore log
 .log
 
-# ignore review
+# ignore review/output
 review
-!/review/README.md
+!review/README.md
+output
+!output/README.md
 
 # ignore dependencies
 node_modules
@@ -15,5 +17,4 @@ node_modules
 test
 
 # ignore dump files.
-output.txt
 request.json

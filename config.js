@@ -21,16 +21,16 @@ const REVIEW_PATH     = './review/';            // Clone the review package to t
 const REVIEW_SCRIPT   = './review.el';
 const REQUEST_DATA    = './request.json';       // Temporary file to output the body form.
 
-const OUTPUT_HEADER   = './output/header.txt';  // File that contains review information.
-const OUTPUT_BODY     = './output/body.txt';    // File that contains review information.
-const OUTPUT_FOOTER   = './output/footer.txt';  // File that contains review information.
+const OUTPUT_HEADER   = './output/header.txt';  // File contains header information.
+const OUTPUT_BODY     = './output/body.txt';    // File contains content information.
+const OUTPUT_FOOTER   = './output/footer.txt';  // File contains footer information.
 
 const TEMPLATE_HEADER = './templates/header.md';
 const TEMPLATE_BODY   = './templates/body.md';
 const TEMPLATE_FOOTER = './templates/footer.md';
 
-const USERNAME        = '';
-const ACCESS_TOKEN    = '';
+const USERNAME        = 'jcs090218';
+const ACCESS_TOKEN    = 'bc5ba72b60dd11862d4c5f230c62fed375b6b59a';
 
 //------------------- Module Exports -------------------//
 

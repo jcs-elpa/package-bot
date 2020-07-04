@@ -29,8 +29,8 @@ const TEMPLATE_HEADER = './templates/header.md';
 const TEMPLATE_BODY   = './templates/body.md';
 const TEMPLATE_FOOTER = './templates/footer.md';
 
-const USERNAME        = 'jcs090218';
-const ACCESS_TOKEN    = 'bc5ba72b60dd11862d4c5f230c62fed375b6b59a';
+const USERNAME        = '';
+const ACCESS_TOKEN    = '';
 
 //------------------- Module Exports -------------------//
 

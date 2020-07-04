@@ -142,7 +142,9 @@ function getPRInfo(num) {
           let url = 'https://api.github.com/repos/melpa/melpa/issues/' + num + '/comments';
 
           if (config.DEBUG)
-            url = 'https://api.github.com/repos/jcs090218/package-bot/issues/2/comments';
+            url = 'https://api.github.com/repos/jcs-elpa/package-bot/issues/2/comments';
+
+          console.log('[URL] ' + url);
 
           let comment_cmd = util.format
           ('curl -u %s:%s --header "Content-Type: application/json" --request POST --data \"@%s\" \"%s\"',

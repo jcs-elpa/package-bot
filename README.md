@@ -1,4 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Release](https://img.shields.io/github/release/jcs-elpa/package-bot.svg?logo=github)](https://github.com/jcs-elpa/package-bot/releases/latest)
 
 # package-bot
 > Review new package PR on [melpa](https://github.com/melpa/melpa) automatically.

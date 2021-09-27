@@ -3,6 +3,8 @@
 # package-bot
 > Review new package PR on [melpa](https://github.com/melpa/melpa) automatically.
 
+[![dependencies Status](https://status.david-dm.org/gh/emacs-grammarly/keytar-cli.svg)](https://david-dm.org/emacs-grammarly/keytar-cli)
+
 ## Dependencies
 
 Here are list of required softwares and npm packages.
